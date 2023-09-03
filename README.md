@@ -1,5 +1,7 @@
 # Trabajos-electiva-
-Trabajos desarrollados en la clase de electiva 
+Trabajos desarrollados en la clase de electiva.
+
+
 
 Esta carpeta esta dispuesta para los codigos realizados en electiva II de ING Biomedica. 
 
