@@ -1,0 +1,182 @@
+---
+title: "REGRESION LINEAL Y MULTILINEAL"
+author: "Santiago Rodriguez Ramirez"
+date: "2023-10-10"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CARGAR LAS BIBLIOTECAS NECESARIAS
+
+
+```{r cars}
+library(caret)
+```
+
+## CARGAR LOS DATOS 
+
+```{r}
+data <- read.csv("C:/Users/Santi/OneDrive/Documentos/Electiva/Data/diabetes_012_health.csv")
+```
+
+Los datos son cargados con la funcion anterior, de esta manera podemos hacer uso del dataset.
+
+## IDENTIFICACION DE VALORES NULOS
+
+```{r}
+sum(is.na(data))
+```
+
+Se identifica si existe alguna valor nulo en el dataset que esta bajo estudio.
+
+## Binarizar la variable de clase (Diabetes_012)
+
+```{r}
+data$Diabetes_012 <- ifelse(data$Diabetes_012 > 0, 1, 0)
+```
+
+Se binariza los valores correspondientes a la variable Diabetes_012, delimitando a 0 los valores de no diabetes y 1 a los valores de prediabetes\diabetes.
+
+## Convertir la variable de clase en un factor de dos niveles
+
+```{r}
+data$Diabetes_012 <- factor(data$Diabetes_012, levels = c(0, 1))
+```
+
+Las variables actuales se encuentran en valores categoricas, para poderlas manipular se convierten a un factor de valores entre 0 y 1.
+
+## Crear un subconjunto de datos para BMI (1% del tamaño original)
+
+```{r}
+set.seed(123)
+subset_bmi <- createDataPartition(data$BMI, p = 0.01, list = FALSE)
+data_bmi <- data[subset_bmi, ]
+```
+
+Se crea un subconjunto de datos para la variable BMI.
+
+```{r}
+subset_mentHlth <- createDataPartition(data$MentHlth, p = 0.01, list = FALSE)
+data_mentHlth <- data[subset_mentHlth, ]
+```
+
+Se crea un subconjunto de datos para la variable MentHlth.
+
+```{r}
+subset_physHlth <- createDataPartition(data$PhysHlth, p = 0.01, list = FALSE)
+data_physHlth <- data[subset_physHlth, ]
+```
+
+Se crea un subconjunto de datos para la variable PhysHlth.
+
+## Entrenar un modelo de regresión lineal para BMI
+
+```{r}
+control <- trainControl(method = "cv", number = 10)
+model_linear_bmi <- train(BMI ~ ., data = data_bmi, method = "lm", trControl = control)
+```
+
+Se entrena un modelo de regresion lineal para la variable Diabetes_012.
+
+## Evaluar el modelo de regresión lineal 
+
+```{r}
+summary(model_linear_bmi)
+```
+
+La funcion evalua el modelo anteriormente entrenado.
+
+## Entrenar un modelo de regresión lineal para MentHlth
+
+```{r}
+control <- trainControl(method = "cv", number = 10)
+model_linear_mentHlth <- train(MentHlth ~ ., data = data_mentHlth, method = "lm", trControl = control)
+```
+
+Se entrena un modelo de regresion lineal para la variable MentHlth.
+
+## Evaluar el modelo de regresión lineal 
+
+```{r}
+summary(model_linear_mentHlth)
+```
+
+La funcion evalua el modelo anteriormente entrenado.
+
+## Entrenar un modelo de regresión lineal para PhysHlth
+
+```{r}
+control <- trainControl(method = "cv", number = 10)
+model_linear_physHlth <- train(PhysHlth ~ ., data = data_physHlth, method = "lm", trControl = control)
+```
+
+
+Se entrena un modelo de regresion lineal para la variable PhysHlth.
+
+## Evaluar el modelo de regresión lineal
+
+```{r}
+summary(model_linear_physHlth)
+```
+
+
+La funcion evalua el modelo anteriormente entrenado.
+
+## Eliminar predictores no significativos
+
+```{r}
+data_bmi_reduced <- data_bmi[, !(names(data_bmi) %in% c("Smoker", "Veggies", "Fruits", "Education", "Income"))]
+```
+
+Se eliminan los predictores que no contribuyen al modelo.
+
+## Entrenar un segundo modelo de regresión lineal con las variables reducidas
+
+```{r}
+model_linear_bmi_reduced <- train(BMI ~ ., data = data_bmi_reduced, method = "lm", trControl = control)
+```
+
+
+Se entrena un segundo modelo de regresion lineal para la variable BMI.
+
+## Evaluar el segundo modelo de regresión lineal
+
+```{r}
+summary(model_linear_bmi_reduced)
+```
+
+La funcion evalua el modelo anteriormente entrenado.
+
+## Seleccionar la mejor característica
+
+```{r}
+data_bmi_best_feature <- data_bmi[, !(names(data_bmi) %in% c("Diabetes_012"))]
+```
+
+Selecciona la mejor caracteristica del modelo anteriormente entrenado 
+
+## Entrenar un tercer modelo de regresión lineal con la mejor variable
+
+```{r}
+model_linear_bmi_best_feature <- train(BMI ~ ., data = data_bmi_best_feature, method = "lm", trControl = trainControl(method = "repeatedcv", number = 10, repeats = 10))
+```
+
+
+Se entrena un tercer modelo de regresion lineal para la variable BMI.
+
+
+## Evaluar el tercer modelo de regresión lineal
+
+```{r}
+summary(model_linear_bmi_best_feature)
+```
+
+La function evalua el modelo anteriormente entrenado.
+
+
+## CONCLUSIONES
+
+El codigo identifica el modelo de regresion lineal que se ajusta mejor a los datos y evaluar como diferentes variables afectan a la de interes, en este caso BMI, MentHlth y PhysHlth

@@ -1,0 +1,108 @@
+---
+title: "EXPLORACION DE DATOS Y PROCESAMIENTO"
+author: "santiago rodriguez"
+date: "2023-10-08"
+output: word_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CARGAR LAS BIBLIOTECAS NECESARIAS
+
+
+```{r cars}
+library(dplyr)
+library(ggplot2)
+```
+
+## CARGAR LOS DATOS 
+```{r}
+data <- read.csv("C:/Users/Santi/OneDrive/Documentos/Electiva/Data/diabetes_012_health.csv")
+```
+Los datos son cargados con la funcion anterior, de esta manera podemos hacer uso del dataset.
+
+## IDENTIFICACION DE VALORES NULOS
+```{r}
+sum(is.na(data))
+```
+se identifica si existe alguna valor nulo en el dataset que esta bajo estudio
+
+## DESCRIPCION Y RESUMEN DE LOS DATOS 
+```{r}
+str(data)
+```
+
+```{r}
+summary(data)
+```
+
+las variables son descritas por medio de la funcion str(), encontrando de esta forma la estructura de los datos. Por otra parte la funcion summary() hace un resumen estadistico del dataset en cuestion
+
+## ENCONTRAR LA CORRELACION ENTRE DATOS
+```{r}
+cor(data)
+```
+
+Con esta funcion encontramos de la correlacion entre variables, de esta forma se da a conocer cuales datos son mas relevantes entre si.Para este dataset se encontro una correlacion entre BMI y Diabetes_012 que es la mas notable.
+
+## GRAFICA DE CORRELACION ENTRE VARIABLES
+```{r}
+ggplot(data = data, aes(x = BMI   , y = log(Diabetes_012))) +
+  geom_point(aes(x = BMI), color = "gray30") +
+  geom_smooth(aes(y = Diabetes_012), color = "firebrick") +
+  theme_bw()
+```
+
+Despues de identificar la correlacion, graficamos para dar un entendimiento mas especifico  entre las variable encontradas anteriormente. Estableciendo un color especifico para cada variable
+
+## DISTRIBUCION DE FRECUENCIAS DE Diabetes_012
+```{r}
+ggplot(data, aes(x = Diabetes_012)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(title = "Distribución de Diabetes_012 ", x = "Diabetes_012", y = "Frecuencia")
+```
+
+En este plot identificamos la frecuencia para cada variable en especifico, en este caso tenemos la variable Diabetes_012 donde encontramos la frecuencia de edades.
+
+## DISTRIBUCION DE FRECUENCIAS DE AGE
+```{r}
+ggplot(data, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(title = "Distribución de Edad", x = "Edad", y = "Frecuencia")
+```
+
+En este plot identificamos la frecuencia para cada variable en especifico, en este caso tenemos la variable Age donde encontramos la frecuencia de edades.
+
+## DISTRIBUCION DE FRECUENCIAS DE BMI
+
+```{r}
+ggplot(data, aes(x = BMI)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(title = "Distribución de BMI", x = "BMI", y = "Frecuencia")
+```
+
+
+En este plot identificamos la frecuencia para cada variable en especifico, en este caso tenemos la variable BMI donde encontramos la frecuencia de edades.
+
+## BINARIZACION DE LA VARIABLE
+```{r}
+data$Diabetes_012 <- ifelse(data$Diabetes_012 > 0, 1, 0)
+```
+
+Se binariza los valores correspondientes a la variable Diabetes_012, delimitando a 0 los valores de no diabetes y 1 a los valores de prediabetes\diabetes
+
+## VERIFICAR LA BINARIZACION
+```{r}
+table(data$Diabetes_012)
+```
+Por ultimo se muestra la binarizacion en la tabla correspondiente para los valores encontrados anteriormente.
+
+## DISTRIBUCION DE FRECUENCIAS DE Diabetes_012
+```{r}
+hist(data$Diabetes_012)
+```
+
+En este histograma identificamos la frecuencia para cada variable en especifico, en este caso tenemos la variable Diabetes_012 donde encontramos la frecuencia de edades.

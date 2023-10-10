@@ -1,0 +1,203 @@
+---
+title: "KNN"
+author: "Santiago Rodriguez Ramirez"
+date: "2023-10-10"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CARGAR LAS BIBLIOTECAS NECESARIAS
+
+
+```{r cars}
+library(caret)
+```
+
+## CARGAR LOS DATOS 
+
+```{r}
+data <- read.csv("C:/Users/Santi/OneDrive/Documentos/Electiva/Data/diabetes_012_health.csv")
+```
+
+Los datos son cargados con la funcion anterior, de esta manera podemos hacer uso del dataset.
+
+## IDENTIFICACION DE VALORES NULOS
+
+```{r}
+sum(is.na(data))
+```
+
+Se identifica si existe alguna valor nulo en el dataset que esta bajo estudio.
+
+## Binarizar la variable de clase (Diabetes_012)
+
+```{r}
+data$Diabetes_012 <- ifelse(data$Diabetes_012 > 0, 1, 0)
+```
+
+Se binariza los valores correspondientes a la variable Diabetes_012, delimitando a 0 los valores de no diabetes y 1 a los valores de prediabetes\diabetes.
+
+## Convertir la variable de clase en un factor de dos niveles
+
+```{r}
+data$Diabetes_012 <- factor(data$Diabetes_012, levels = c(0, 1))
+```
+
+Las variables actuales se encuentran en valores categoricas, para poderlas manipular se convierten a un factor de valores entre 0 y 1.
+
+## Crear subconjunto equilibrado para "Diabetes_012" (1% del conjunto de datos)
+
+```{r}
+subset_diabetes <- createDataPartition(data$Diabetes_012, p = 0.01, list = FALSE)
+data_diabetes <- data[subset_diabetes, ]
+```
+
+Se crean los subconjuntos equilibrados para cada variable estipulada en la actividad dispuesta.
+
+## Subconjunto equilibrado para "HeartDiseaseorAttack"
+
+```{r}
+subset_heart <- createDataPartition(data$HeartDiseaseorAttack, p = 0.01, list = FALSE)
+data_heart <- data[subset_heart, ]
+```
+
+Este subconjunto equilibrado esta realizado para HeartDiseaseorAttack.
+
+## Subconjunto equilibrado para "Sex"
+
+```{r}
+subset_sex <- createDataPartition(data$Sex, p = 0.01, list = FALSE)
+data_sex <- data[subset_sex, ]
+```
+
+Este subconjunto equilibrado esta realizado para sex.
+
+## Entrenar un modelo kNN con \todas las variables
+
+```{r}
+control <- trainControl(method = "cv", number = 10)
+model_knn <- train(Diabetes_012 ~ ., data = data_diabetes, method = "knn", trControl = control)
+```
+
+Se entrena un modelo KNN para la variable Diabetes_012.
+
+```{r}
+control <- trainControl(method = "cv", number = 10)
+model_heart <- train(HeartDiseaseorAttack ~ ., data = data_heart, method = "knn", trControl = control)
+
+```
+
+Se entrena un modelo KNN para la variable HeartDiseaseorAttack.
+
+```{r}
+control <- trainControl(method = "cv", number = 10)
+model_sex <- train(Sex ~ ., data = data_sex, method = "knn", trControl = control)
+
+```
+
+Se entrena un modelo KNN para la variable sex.
+
+```{r}
+summary(model_knn)
+```
+
+Esta funcion nos arroja un valor estadistico para este modelo en especifico, en este caso Diabetes_012.
+
+```{r}
+summary(model_heart)
+```
+
+Esta funcion nos arroja un valor estadistico para este modelo en especifico, en este caso HeartDiseaseorAttack.
+
+```{r}
+summary(model_sex)
+```
+
+Esta funcion nos arroja un valor estadistico para este modelo en especifico, en este caso sex.
+
+## Mtrix confusion
+
+```{r}
+confusion_matrix_knn <- confusionMatrix(predict(model_knn, newdata = data_diabetes), data_diabetes$Diabetes_012)
+print("Rendimiento del Modelo k-NN para Diabetes_012 (Clasificación Binaria):")
+print(confusion_matrix_knn)
+```
+
+Matriz para evaluar el rendimiento del modelo.
+
+
+## Eliminar 5 predictores
+```{r}
+data_diabetes_reduced <- data_diabetes[, !(names(data_diabetes) %in% c("Smoker", "Veggies", "Fruits", "Education", "Income"))]
+```
+
+Se eliminan las 5 variables de acuerdo al estudio estadistico realizado.
+
+## Entrenar un segundo modelo kNN con las variables reducidas (encuentre un k óptimo)
+
+```{r}
+control <- trainControl(method = "cv", number = 5)
+model_knn_reduced <- train(Diabetes_012 ~ ., data = data_diabetes_reduced, method = "knn", trControl = control)
+```
+
+Se entrena un segundo modelo KNN nuevamente para Diabetes_012.
+
+## Evaluar el segundo modelo
+
+```{r}
+summary(model_knn_reduced)
+```
+
+Evaluamos el segundo modelo KNN.
+
+## Eliminar 5 predictores adicionales
+
+```{r}
+data_diabetes_reduced2 <- data_diabetes_reduced[, !(names(data_diabetes_reduced) %in% c("GenHlth", "NoDocbcCost", "MentHlth", "PhysHlth", "DiffWalk"))]
+```
+
+Se eliminan  5 variables adicionales de acuerdo al estudio estadistico realizado.
+
+## Entrenar un tercer modelo kNN
+
+```{r}
+model_knn_reduced2 <- train(Diabetes_012 ~ ., data = data_diabetes_reduced2, method = "knn", trControl = control)
+```
+
+Se entrena un segundo modelo KNN nuevamente para Diabetes_012.
+
+## Evaluar el tercer modelo con validación cruzada repetida de 10 pliegues 
+
+```{r}
+set.seed(123)
+model_knn_reduced2_repeated <- train(Diabetes_012 ~ ., data = data_diabetes_reduced2, method = "knn", trControl = trainControl(method = "repeatedcv", number = 10, repeats = 10))
+```
+
+Se genera la validacion cruazada para el modelo.
+
+## Evaluar el tercer modelo
+
+```{r}
+summary(model_knn_reduced2_repeated)
+```
+
+Evaluamos el tercer modelo KNN.
+
+## Matriz de confusion
+
+```{r}
+confusion_matrix_knn <- confusionMatrix(predict(model_knn_reduced2, newdata = data_diabetes), data_diabetes$Diabetes_012)
+print("Rendimiento del Modelo k-NN para Diabetes_012 (Clasificación Binaria):")
+print(confusion_matrix_knn)
+```
+
+Matriz para evaluar el rendimiento del modelo.
+
+## CONCLUSIONES
+A medida que se retiraronlas variables no se evidencian gran cambio en los resultados, encontrando que el ultimo modelo no tiene gran diferencia con el modelo. 
+Evidenciando este por medio de la matriz de confusion donde se muestra una diferencia minima entre rendimientos del modelo.
+
+
